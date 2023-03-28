@@ -6,15 +6,20 @@ import { UserService } from './services';
 import { BarberShopModule } from '../barberShops';
 import { BarberShopRepository } from '../barberShops/repositories';
 import { BarberShopService } from '../barberShops/services';
+import { JwtService } from '@nestjs/jwt';
+import { AuthService } from './services/auth.services';
+import { AuthController } from './controllers/auth.controllers';
 
 @Module({
   imports: [PrismaModule, BarberShopModule],
-  controllers: [UserController],
+  controllers: [UserController, AuthController],
   providers: [
     UserService,
     UserRepository,
     BarberShopRepository,
     BarberShopService,
+    JwtService,
+    AuthService,
   ],
 })
 export class UserModule {}
