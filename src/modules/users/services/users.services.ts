@@ -1,32 +1,77 @@
-import { ConflictException, Injectable } from "@nestjs/common";
-import { Role } from "@prisma/client";
-import { validate } from "src/modules/shared/validations/validate";
-import { CreateBarberInput, CreateCustomerInput } from "../dtos";
-import { UserRepository } from "../repositories";
-import { zodCreateCustomerInput } from "../validations";
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { Role } from '@prisma/client';
+import { validate } from 'src/modules/shared/validations/validate';
+import {
+  CreateBarberInput,
+  CreateCustomerInput,
+  CreateShopOwnerInput,
+} from '../dtos';
+import { UserRepository } from '../repositories';
+import { zodCreateCustomerInput } from '../validations';
 import { hash } from 'argon2';
+import { BarberShopService } from 'src/modules/barberShops/services/barberShops.services';
+import { BarberShopRepository } from 'src/modules/barberShops/repositories';
 
 type UserInput = CreateBarberInput | CreateCustomerInput;
 
 @Injectable()
 export class UserService {
-  constructor(private readonly userRepository: UserRepository) { }
+  constructor(
+    private readonly userRepository: UserRepository,
+    private readonly barberShopRepository: BarberShopRepository,
+    private readonly barberShopService: BarberShopService,
+  ) {}
 
   async createCustomer(input: CreateCustomerInput) {
     return await this.createUser(input, 'CUSTOMER');
   }
 
   async createBarber(input: CreateBarberInput) {
+    const shopExists = this.barberShopRepository.exists({
+      id: input.workingBarberShopId,
+    });
+
+    if (!shopExists) throw new NotFoundException('Barber shop not found!');
+
     return await this.createUser(input, 'BARBER');
+  }
+
+  async createShopOwner(input: CreateShopOwnerInput) {
+    const owner = await this.createUser(
+      {
+        email: input.email,
+        name: input.name,
+        password: input.password,
+      },
+      'SHOP_OWNER',
+    );
+
+    const barberShop = await this.barberShopService.create(
+      owner,
+      input.barberShop,
+    );
+
+    return {
+      id: owner.id,
+      name: owner.name,
+      email: owner.email,
+      barberShop: {
+        id: barberShop.id,
+        name: barberShop.name,
+      },
+    };
   }
 
   private async createUser(input: UserInput, role: Role) {
     const exists = !!(await this.userRepository.findOne({
-      email: input.email
+      email: input.email,
     }));
 
-    if (exists)
-      throw new ConflictException('Email already registered!');
+    if (exists) throw new ConflictException('Email already registered!');
 
     await validate(input, zodCreateCustomerInput);
 
@@ -35,7 +80,7 @@ export class UserService {
     const user = await this.userRepository.create({
       ...input,
       password,
-      role: role
+      role: role,
     });
 
     return user;
