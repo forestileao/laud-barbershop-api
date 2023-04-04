@@ -11,8 +11,14 @@ export class BarberShopService {
     return await this.barberShopRepository.create({
       name: input.name,
       owner: {
-        connect: owner,
+        connect: {
+          id: owner.id,
+        },
       },
     });
+  }
+
+  async listSimple() {
+    return await this.barberShopRepository.getSimple();
   }
 }

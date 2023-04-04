@@ -1,7 +1,9 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { SignInInput } from '../dtos/auth.dtos';
 import { UserRepository } from '../repositories';
@@ -16,6 +18,8 @@ export class AuthService {
   ) {}
 
   async signIn(input: SignInInput) {
+    if (!input.email) throw new BadRequestException('Invalid email!');
+
     const user = await this.userRepository.findOne({
       email: input.email,
     });

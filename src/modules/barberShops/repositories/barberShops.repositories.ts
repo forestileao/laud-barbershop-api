@@ -6,8 +6,22 @@ import { Injectable } from '@nestjs/common';
 export class BarberShopRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
+  getSimple(input: Prisma.BarberShopWhereInput = undefined) {
+    return this.prismaService.barberShop.findMany({
+      where: input,
+      select: {
+        id: true,
+        name: true,
+      },
+    });
+  }
+
   async exists(input: Prisma.BarberShopWhereInput) {
-    return (await this.prismaService.barberShop.count()) > 0;
+    return (
+      (await this.prismaService.barberShop.count({
+        where: input,
+      })) > 0
+    );
   }
 
   findOne(input: Prisma.BarberShopWhereUniqueInput) {

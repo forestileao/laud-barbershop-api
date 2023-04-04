@@ -2,8 +2,9 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  ParseUUIDPipe,
 } from '@nestjs/common';
-import { Role } from '@prisma/client';
+import { Prisma, Role } from '@prisma/client';
 import { validate } from 'src/modules/shared/validations/validate';
 import {
   CreateBarberInput,
@@ -31,9 +32,12 @@ export class UserService {
   }
 
   async createBarber(input: CreateBarberInput) {
-    const shopExists = this.barberShopRepository.exists({
-      id: input.workingBarberShopId,
-    });
+    const shopExists =
+      input?.workingBarberShopId.length === 36
+        ? !!(await this.barberShopRepository.findOne({
+            id: input.workingBarberShopId,
+          }))
+        : false;
 
     if (!shopExists) throw new NotFoundException('Barber shop not found!');
 
@@ -77,11 +81,21 @@ export class UserService {
 
     const password = await hash(input.password);
 
-    const user = await this.userRepository.create({
-      ...input,
+    const params: Prisma.UserCreateInput = {
+      email: input.email,
+      name: input.name,
       password,
       role: role,
-    });
+    };
+
+    if (role === 'BARBER')
+      params.workingBarberShop = {
+        connect: {
+          id: (input as CreateBarberInput).workingBarberShopId,
+        },
+      };
+
+    const user = await this.userRepository.create(params);
 
     return user;
   }
