@@ -3,12 +3,23 @@ import { UserController } from './controllers';
 import { PrismaModule } from '../prisma';
 import { UserRepository } from './repositories';
 import { UserService } from './services';
-import { AuthController } from './controllers/auth.controller';
+import { BarberShopModule } from '../barberShops';
+import { BarberShopRepository } from '../barberShops/repositories';
+import { BarberShopService } from '../barberShops/services';
+import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './services/auth.services';
+import { AuthController } from './controllers/auth.controllers';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, BarberShopModule],
   controllers: [UserController, AuthController],
-  providers: [UserService, UserRepository, AuthService],
+  providers: [
+    UserService,
+    UserRepository,
+    BarberShopRepository,
+    BarberShopService,
+    JwtService,
+    AuthService,
+  ],
 })
 export class UserModule {}

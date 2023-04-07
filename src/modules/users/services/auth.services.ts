@@ -1,27 +1,48 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { verify } from 'argon2';
-
-import { SignInInput, SignUpInput } from '../dtos/auth.dtos';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
+import { SignInInput } from '../dtos/auth.dtos';
 import { UserRepository } from '../repositories';
-import { UserService } from './users.services';
+import { verify } from 'argon2';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly userService: UserService,
     private readonly userRepository: UserRepository,
+    private readonly jwtService: JwtService,
   ) {}
 
   async signIn(input: SignInInput) {
-    const user = await this.userRepository.findOne({ email: input.email });
+    if (!input.email) throw new BadRequestException('Invalid email!');
 
-    if (!user || !(await verify(user.password, input.password)))
-      throw new BadRequestException('Email or password wrong!');
+    const user = await this.userRepository.findOne({
+      email: input.email,
+    });
 
-    return user;
-  }
+    if (!user) throw new UnauthorizedException('Wrong email/password.');
 
-  async signUp(input: SignUpInput) {
-    return await this.userService.createUser(input, input.role);
+    const validPassword = await verify(user.password, input.password);
+
+    if (!validPassword)
+      throw new UnauthorizedException('Wrong email/password.');
+
+    const payload = { email: user.email, sub: user.id, role: user.role };
+    const token = this.jwtService.sign(payload, {
+      secret: process.env.SECRET || '',
+    });
+
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      },
+      token,
+    };
   }
 }

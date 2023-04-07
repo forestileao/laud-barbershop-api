@@ -1,4 +1,6 @@
-export interface CreateCustomerInput {
+import { CreateBarberShopInput } from 'src/modules/barberShops/dtos';
+
+interface CreateUserInput {
   email: string;
   age: number;
   firstName: string;
@@ -6,6 +8,12 @@ export interface CreateCustomerInput {
   password: string;
 }
 
-export interface CreateBarberInput extends CreateCustomerInput {
+export type CreateCustomerInput = CreateUserInput;
+
+export interface CreateBarberInput extends CreateUserInput {
   workingBarberShopId: string;
+}
+
+export interface CreateShopOwnerInput extends CreateUserInput {
+  barberShop: CreateBarberShopInput;
 }
