@@ -11,3 +11,7 @@ export interface UpdateAppointmentInput {
   endDate?: Date;
   barberId?: string;
 }
+
+export interface CancelAppointmentInput {
+  appointmentId: string;
+}

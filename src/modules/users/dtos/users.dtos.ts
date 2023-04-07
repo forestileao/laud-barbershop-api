@@ -1,6 +1,8 @@
 export interface CreateCustomerInput {
   email: string;
-  name: string;
+  age: number;
+  firstName: string;
+  lastName: string;
   password: string;
 }
 

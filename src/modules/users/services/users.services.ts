@@ -20,7 +20,7 @@ export class UserService {
     return await this.createUser(input, 'BARBER');
   }
 
-  private async createUser(input: UserInput, role: Role) {
+  async createUser(input: UserInput, role: Role) {
     const exists = !!(await this.userRepository.findOne({
       email: input.email,
     }));
