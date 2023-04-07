@@ -39,23 +39,27 @@ export class UserService {
         : false;
 
     if (!shopExists) throw new NotFoundException('Barber shop not found!');
-
     return await this.createUser(input, 'BARBER');
   }
 
   async createShopOwner(input: CreateShopOwnerInput) {
-    const owner = await this.createUser(input, 'SHOP_OWNER');
-
+    const owner = await this.createUser(
+      {
+        email: input.email,
+        firstName: input.firstName,
+        password: input.password,
+        lastName: input.lastName,
+        age: input.age,
+      },
+      'SHOP_OWNER',
+    );
     const barberShop = await this.barberShopService.create(
       owner,
       input.barberShop,
     );
 
     return {
-      id: owner.id,
-      firstName: owner.firstName,
-      lastName: owner.lastName,
-      email: owner.email,
+      ...owner,
       barberShop: {
         id: barberShop.id,
         name: barberShop.name,
@@ -73,20 +77,23 @@ export class UserService {
     await validate(input, zodCreateCustomerInput);
 
     const password = await hash(input.password);
-
+    const workingBarberShopId = (input as CreateBarberInput)
+      .workingBarberShopId;
+    delete (input as CreateBarberInput).workingBarberShopId;
     const params: Prisma.UserCreateInput = {
       ...input,
       password,
     };
 
-    if (role === 'BARBER')
+    if (role === 'BARBER') {
       params.workingBarberShop = {
         connect: {
-          id: (input as CreateBarberInput).workingBarberShopId,
+          id: workingBarberShopId,
         },
       };
+    }
 
-    const user = await this.userRepository.create(params);
+    const user = await this.userRepository.create({ ...params, role });
 
     return user;
   }
