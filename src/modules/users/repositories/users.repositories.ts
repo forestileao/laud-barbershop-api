@@ -8,7 +8,7 @@ export class UserRepository {
 
   findOne(input: Prisma.UserWhereUniqueInput) {
     return this.prismaService.user.findUnique({
-      where: input
+      where: input,
     });
   }
 

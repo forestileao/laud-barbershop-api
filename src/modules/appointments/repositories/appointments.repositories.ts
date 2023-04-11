@@ -12,7 +12,15 @@ export class AppointmentsRepository {
     });
   }
 
-  find(input: Prisma.AppointmentWhereInput) {}
+  find(input: Prisma.AppointmentWhereInput) {
+    return this.prismaService.appointment.findMany({
+      where: input,
+      include: {
+        barber: true,
+        barberShop: true
+      }
+    });
+  }
 
   create(input: Prisma.AppointmentCreateInput) {
     return this.prismaService.appointment.create({

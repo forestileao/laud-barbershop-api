@@ -6,12 +6,17 @@ import { UserService } from './services';
 import { BarberShopModule } from '../barberShops';
 import { BarberShopRepository } from '../barberShops/repositories';
 import { BarberShopService } from '../barberShops/services';
-import { JwtService } from '@nestjs/jwt';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 import { AuthService } from './services/auth.services';
 import { AuthController } from './controllers/auth.controllers';
 
 @Module({
-  imports: [PrismaModule, BarberShopModule],
+  imports: [PrismaModule, BarberShopModule, JwtModule.register({
+    secret: process.env.SECRET,
+    signOptions: { expiresIn: '3600s' },
+    global: true,
+  })
+],
   controllers: [UserController, AuthController],
   providers: [
     UserService,
