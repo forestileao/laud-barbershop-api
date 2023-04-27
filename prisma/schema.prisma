@@ -15,17 +15,18 @@ model User {
   email     String @unique
   firstName String
   lastName  String
-  age       Int
+  birthdate DateTime
   password  String
   role      Role   @default(CUSTOMER)
 
   ownedBarberShop BarberShop? @relation(name: "owner")
+  wallet  Wallet? @relation(name: "customer_wallet")
 
   workingBarberShop   BarberShop? @relation(name: "barbers", fields: [workingbarberShopId], references: [id])
   workingbarberShopId String?     @db.Uuid
 
-  customerAppointments Appointment[] @relation(name: "customer") 
-  barberAppointments Appointment[] @relation(name: "barber") 
+  customerAppointments Appointment[] @relation(name: "customer")
+  barberAppointments Appointment[] @relation(name: "barber")
 }
 
 enum Role {
@@ -42,6 +43,7 @@ model BarberShop {
   ownerId     String        @unique @db.Uuid
   barbers     User[]        @relation(name: "barbers")
   Appointment Appointment[]
+  reports   Report[]        @relation(name: "reports")
   createdAt   DateTime      @default(now())
 }
 
@@ -60,4 +62,20 @@ model Appointment {
   barberShopId String     @db.Uuid
 
   createdAt DateTime @default(now())
+}
+
+model Report {
+  id          String   @id @default(uuid()) @db.Uuid
+  from  DateTime
+  to    DateTime
+  totalReports Int @default(0)
+  barberShop   BarberShop @relation(name: "reports",fields: [barberShopId], references: [id])
+  barberShopId String     @db.Uuid
+}
+
+model Wallet {
+  id          String   @id @default(uuid()) @db.Uuid
+  customer   User   @relation(name: "customer_wallet", fields: [customerId], references: [id])
+  customerId String @db.Uuid @unique
+  value     Float @default(0)
 }
