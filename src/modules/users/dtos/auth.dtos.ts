@@ -8,7 +8,7 @@ export interface SignInInput {
 export interface SignUpInput {
   firstName: string;
   lastName: string;
-  age: number;
+  birthDate: Date;
   email: string;
   password: string;
   role: Role;

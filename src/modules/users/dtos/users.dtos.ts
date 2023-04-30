@@ -2,7 +2,7 @@ import { CreateBarberShopInput } from 'src/modules/barberShops/dtos';
 
 interface CreateUserInput {
   email: string;
-  age: number;
+  birthdate: Date;
   firstName: string;
   lastName: string;
   password: string;

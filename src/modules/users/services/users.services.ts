@@ -49,7 +49,7 @@ export class UserService {
         firstName: input.firstName,
         password: input.password,
         lastName: input.lastName,
-        age: input.age,
+        birthdate: input.birthdate,
       },
       'SHOP_OWNER',
     );
