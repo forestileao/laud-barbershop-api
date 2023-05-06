@@ -1,10 +1,14 @@
-import { Prisma } from "@prisma/client";
-import { PrismaService } from "src/modules/prisma";
-import { Injectable } from "@nestjs/common";
+import { Prisma } from '@prisma/client';
+import { PrismaService } from 'src/modules/prisma';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class UserRepository {
-  constructor(private readonly prismaService: PrismaService) { }
+  constructor(private readonly prismaService: PrismaService) {}
+
+  find(input: Prisma.UserWhereInput) {
+    return this.prismaService.user.findMany({ where: input });
+  }
 
   findOne(input: Prisma.UserWhereUniqueInput) {
     return this.prismaService.user.findUnique({
@@ -14,7 +18,7 @@ export class UserRepository {
 
   create(input: Prisma.UserCreateInput) {
     return this.prismaService.user.create({
-      data: input
+      data: input,
     });
   }
 
@@ -22,14 +26,14 @@ export class UserRepository {
     return this.prismaService.user.update({
       data: input,
       where: {
-        id
-      }
+        id,
+      },
     });
   }
 
   delete(input: Prisma.UserWhereUniqueInput) {
     return this.prismaService.user.delete({
-      where: input
+      where: input,
     });
   }
 }
