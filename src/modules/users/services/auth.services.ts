@@ -9,11 +9,13 @@ import { SignInInput } from '../dtos/auth.dtos';
 import { UserRepository } from '../repositories';
 import { verify } from 'argon2';
 import { JwtService } from '@nestjs/jwt';
+import { BarberShopRepository } from 'src/modules/barberShops/repositories';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userRepository: UserRepository,
+    private readonly barberShopRepository: BarberShopRepository,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -36,6 +38,12 @@ export class AuthService {
       secret: process.env.SECRET || '',
     });
 
+    let barberShopId: string
+    if (user.role === 'SHOP_OWNER')
+      barberShopId = (await this.barberShopRepository.findOne({
+        ownerId: user.id
+      })).id
+
     return {
       user: {
         id: user.id,
@@ -43,6 +51,7 @@ export class AuthService {
         role: user.role,
         firstName: user.firstName,
         lastName: user.lastName,
+        barberShopId
       },
       token,
     };
