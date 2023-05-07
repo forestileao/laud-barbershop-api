@@ -89,6 +89,12 @@ export class AppointmentsService {
     await this.appointmentsRepository.delete({ id: appointment.id });
   }
 
+  async listByBarber(barberId: string) {
+    return await this.appointmentsRepository.find({
+      barberId: barberId
+    })
+  }
+
   async listByUser(userId: string) {
     return await this.appointmentsRepository.find({
       customerId: userId

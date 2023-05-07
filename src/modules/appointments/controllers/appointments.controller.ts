@@ -13,6 +13,12 @@ export class AppointmentController {
     return await this.appointmentService.listByUser(req.user.id);
   }
 
+  @Get('/barber')
+  @UseGuards(AuthGuard)
+  async listByBarber(@Request() req) {
+    return await this.appointmentService.listByBarber(req.user.id);
+  }
+
   @Post()
   @UseGuards(AuthGuard)
   async createAppointment(@Body() createAppointmentInput: CreateAppointmentInput,  @Request() req) {

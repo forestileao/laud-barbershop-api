@@ -17,7 +17,8 @@ export class AppointmentsRepository {
       where: input,
       include: {
         barber: true,
-        barberShop: true
+        barberShop: true,
+        customer: true
       }
     });
   }
