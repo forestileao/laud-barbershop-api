@@ -49,7 +49,7 @@ export class UserService {
         firstName: input.firstName,
         password: input.password,
         lastName: input.lastName,
-        birthdate: input.birthdate,
+        birthdate: new Date(input.birthdate),
       },
       'SHOP_OWNER',
     );
@@ -73,6 +73,8 @@ export class UserService {
     }));
 
     if (exists) throw new ConflictException('Email already registered!');
+
+    input.birthdate = new Date(input.birthdate);
 
     await validate(input, zodCreateCustomerInput);
 
