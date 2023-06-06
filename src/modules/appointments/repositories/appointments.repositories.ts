@@ -6,6 +6,12 @@ import { Injectable } from '@nestjs/common';
 export class AppointmentsRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
+  count(input: Prisma.AppointmentWhereInput) {
+    return this.prismaService.appointment.count({
+      where: input
+    });
+  }
+
   findOne(input: Prisma.AppointmentWhereUniqueInput) {
     return this.prismaService.appointment.findUnique({
       where: input,

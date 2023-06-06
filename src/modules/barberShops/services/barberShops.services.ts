@@ -1,23 +1,61 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { CreateBarberShopInput } from '../dtos';
 import { BarberShopRepository } from '../repositories';
 import { UserRepository } from 'src/modules/users/repositories';
+import { ReportRepository } from '../repositories/reports.repositories';
+import { AppointmentsRepository } from 'src/modules/appointments/repositories';
 
 @Injectable()
 export class BarberShopService {
   constructor(
     private readonly barberShopRepository: BarberShopRepository,
+    private readonly reportRepository: ReportRepository,
+    private readonly appointmentsRepository: AppointmentsRepository,
     private readonly userRepository: UserRepository,
   ) {}
+
+  async getAllReportsByOwner(ownerId: string) {
+    const barberShop = await this.barberShopRepository.findOne({
+      ownerId,
+    });
+
+    if (!barberShop) throw new NotFoundException('Invalid Barber Shop!');
+
+    return await this.reportRepository.getAllByShop(barberShop.id);
+  }
+
+  async generateReport(ownerId: string, from: Date, to: Date) {
+    const barberShop = await this.barberShopRepository.findOne({
+      ownerId,
+    });
+
+    if (!barberShop) throw new NotFoundException('Invalid Barber Shop!');
+
+    const totalReports = await this.appointmentsRepository.count({
+      AND: [
+        { createdAt: { gte: from } },
+        { createdAt: { lte: to } }
+      ]
+    })
+
+    return await this.reportRepository.create({
+      from,
+      to,
+      totalReports,
+      barberShop: {
+        connect: {
+          id: barberShop.id
+        }
+      }
+    });
+  }
 
   async create(owner: User, input: CreateBarberShopInput) {
     return await this.barberShopRepository.create({
       name: input.name,
       owner: {
-        connect: {
-          id: owner.id,
-        },
+        connect: { id: owner.id },
       },
     });
   }
