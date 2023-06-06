@@ -1,9 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { CreateBarberShopInput } from '../dtos';
-import { BarberShopRepository } from '../repositories';
+import { BarberShopRepository, ReportRepository } from '../repositories';
 import { UserRepository } from 'src/modules/users/repositories';
-import { ReportRepository } from '../repositories/reports.repositories';
 import { AppointmentsRepository } from 'src/modules/appointments/repositories';
 
 @Injectable()
